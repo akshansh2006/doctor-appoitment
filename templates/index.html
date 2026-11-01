@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment System - Version 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Top Blue Navigation / Header with prominent Version 1 text -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="cross-icon">&#10010;</span>
+                <h1>Doctor Appointment System</h1>
+            </div>
+            <div class="version-badge">Version 1</div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Flash messages for booking confirmation and errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="content-grid">
+            <!-- Card 1: Appointment Booking Form -->
+            <section class="card form-card">
+                <h2>Book an Appointment</h2>
+                <p class="card-subtitle">Fill in the details below to schedule a visit.</p>
+
+                <form method="POST" action="{{ url_for('index') }}" class="booking-form">
+                    <div class="form-group">
+                        <label for="patient_name">Patient Name</label>
+                        <input
+                            type="text"
+                            id="patient_name"
+                            name="patient_name"
+                            placeholder="e.g. John Doe"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor">Doctor</label>
+                        <select id="doctor" name="doctor" required>
+                            <option value="" disabled selected>-- Select a Doctor --</option>
+                            {% for doc in doctors %}
+                                <option value="{{ doc }}">{{ doc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Appointment Date</label>
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="time_slot">Time Slot</label>
+                            <select id="time_slot" name="time_slot" required>
+                                <option value="" disabled selected>-- Select Time --</option>
+                                {% for slot in time_slots %}
+                                    <option value="{{ slot }}">{{ slot }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Book Appointment</button>
+                </form>
+            </section>
+
+            <!-- Card 2: Appointments Table List -->
+            <section class="card table-card">
+                <div class="card-header-row">
+                    <h2>Scheduled Appointments</h2>
+                    <span class="appointment-count">{{ appointments|length }} Booked</span>
+                </div>
+                <p class="card-subtitle">List of all currently confirmed patient appointments.</p>
+
+                {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appointments %}
+                                    <tr>
+                                        <td class="font-bold">{{ appt['patient_name'] }}</td>
+                                        <td>{{ appt['doctor'] }}</td>
+                                        <td>{{ appt['date'] }}</td>
+                                        <td><span class="time-pill">{{ appt['time_slot'] }}</span></td>
+                                        <td>
+                                            <form method="POST" action="{{ url_for('cancel', appointment_id=appt['id']) }}" class="inline-form">
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-cancel"
+                                                    onclick="return confirm('Are you sure you want to cancel this appointment?');"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128197;</div>
+                        <p>No appointments booked yet.</p>
+                        <span>Use the form on the left to schedule your first appointment.</span>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>Doctor Appointment System &bull; CI/CD Pipeline Demo &bull; <strong>Version 1</strong></p>
+    </footer>
+</body>
+</html>
